@@ -2,41 +2,58 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>和菓子ARギフト A/B デモ</title>
+  <title>和菓子ARギフト A/B デモ（黒画面対策版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
   <!-- Three.js & WebXR -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      font-family: system-ui, sans-serif;
       background: #000;
+      font-family: system-ui, sans-serif;
+      touch-action: none;
     }
 
-    /* UI全体 */
+    /* AR開始ボタン */
+    #start-ar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    /* UIボタン */
     #ui {
       position: fixed;
       bottom: 16px;
       left: 0;
       right: 0;
-      display: flex;
+      display: none;
       justify-content: center;
       gap: 12px;
-      z-index: 10;
+      z-index: 1000;
     }
 
     .btn {
       padding: 12px 18px;
       font-size: 14px;
-      border-radius: 999px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
       border: none;
-      background: rgba(0,0,0,0.75);
-      color: white;
-      cursor: pointer;
+      border-radius: 999px;
     }
 
     .btn.active {
@@ -44,30 +61,13 @@
       color: #000;
       font-weight: bold;
     }
-
-    #start-ar {
-      position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      padding: 10px 16px;
-      font-size: 14px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
 
-  <!-- AR開始ボタン -->
   <button id="start-ar">ARを開始</button>
 
-  <!-- A/B 切替UI -->
-  <div id="ui" style="display:none;">
+  <div id="ui">
     <button id="btnA" class="btn active">Aセット</button>
     <button id="btnB" class="btn">Bセット</button>
   </div>
@@ -79,74 +79,95 @@
     const modelAPath = "./assets/models/wagashi_a.glb";
     const modelBPath = "./assets/models/wagashi_b.glb";
 
-    const startButton = document.getElementById("start-ar");
+    const startBtn = document.getElementById("start-ar");
     const ui = document.getElementById("ui");
-    const btnA = document.getElementById("btnA");
-    const btnB = document.getElementById("btnB");
 
-    startButton.addEventListener("click", initAR);
-    btnA.addEventListener("click", () => switchModel("A"));
-    btnB.addEventListener("click", () => switchModel("B"));
+    startBtn.addEventListener("click", () => initAR());
 
     async function initAR() {
-      startButton.style.display = "none";
-      ui.style.display = "flex";
+      startBtn.style.display = "none";
 
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera();
 
-      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+      const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
       scene.add(light);
 
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance"
+      });
+
+      renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.xr.enabled = true;
+
       document.body.appendChild(renderer.domElement);
 
-      document.body.appendChild(ARButton.createButton(renderer));
+      // iPhone 黒画面対策：初期化タイミングを明確化
+      const xrButton = ARButton.createButton(renderer, { requiredFeatures: ["hit-test"] });
+      document.body.appendChild(xrButton);
 
-      // 最初にAセットを読み込み
-      loadModel(modelAPath);
+      xrButton.addEventListener("click", () => {
+        // XR開始後にUIを表示する
+        ui.style.display = "flex";
+
+        // 初期モデル読み込み
+        loadModel(modelAPath);
+      });
 
       renderer.setAnimationLoop(() => {
         renderer.render(scene, camera);
       });
+
+      // 黒画面対策：orientation change に対応
+      window.addEventListener("resize", () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     }
 
-    async function loadModel(path) {
-      if (currentModel) {
-        scene.remove(currentModel);
-      }
+    function loadModel(path) {
+      if (currentModel) scene.remove(currentModel);
 
       const loader = new THREE.GLTFLoader();
       loader.load(path, (gltf) => {
         currentModel = gltf.scene;
 
-        // スケール調整（必要に応じて変更）
-        currentModel.scale.set(1, 1, 1);
-
-        // 床置き
+        // 床置き位置（必要に応じ調整）
         currentModel.position.set(0, -0.5, -1);
+
+        // アニメーション対応
+        if (gltf.animations && gltf.animations.length > 0) {
+          const mixer = new THREE.AnimationMixer(currentModel);
+          const action = mixer.clipAction(gltf.animations[0]);
+          action.play();
+
+          renderer.setAnimationLoop((t) => {
+            mixer.update(0.016);
+            renderer.render(scene, camera);
+          });
+        }
 
         scene.add(currentModel);
       });
     }
 
-    function switchModel(type) {
-      if (type === "A") {
-        loadModel(modelAPath);
-        btnA.classList.add("active");
-        btnB.classList.remove("active");
-      } else {
-        loadModel(modelBPath);
-        btnB.classList.add("active");
-        btnA.classList.remove("active");
-      }
+    document.getElementById("btnA").addEventListener("click", () => {
+      loadModel(modelAPath);
+      setActive("A");
+    });
+
+    document.getElementById("btnB").addEventListener("click", () => {
+      loadModel(modelBPath);
+      setActive("B");
+    });
+
+    function setActive(type) {
+      document.getElementById("btnA").classList.toggle("active", type === "A");
+      document.getElementById("btnB").classList.toggle("active", type === "B");
     }
   </script>
-
-  <!-- GLTFLoader -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
 </body>
 </html>
