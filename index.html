@@ -5,6 +5,17 @@
   <title>和菓子ARギフト A/B セット</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
+  <!-- ▼▼ GA4 計測タグ（G-HM4JZPG0WX） ▼▼ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HM4JZPG0WX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-HM4JZPG0WX');  // ページビュー計測
+  </script>
+  <!-- ▲▲ GA4 計測タグ（ここまで） ▲▲ -->
+
   <style>
     body {
       margin: 0;
@@ -59,29 +70,24 @@
   <h1>和菓子ARギフト A/Bセット</h1>
   <p>
     下のボタンから Aセット / Bセット を選ぶと、AR表示が開きます。<br>
-    ※iPhone / iPad の Safari でご利用ください。<br>
-    ※もし表示されない場合は「長押し → 新規タブで開く」をお試しください。
+    ※iPhone / iPad の Safari でご利用ください。
   </p>
 
   <!-- ▼ A/B セットのAR起動ボタン -->
   <div class="btn-row">
-
-    <!-- Aセット -->
     <a class="ar-btn"
        rel="ar"
-       target="_blank"
-       href="https://www.dropbox.com/scl/fi/5q835qy92gp4z1yizxg9s/wagashi_A.usdz?dl=1">
+       href="https://www.dropbox.com/scl/fi/5q835qy92gp4z1yizxg9s/wagashi_A.usdz?dl=1"
+       onclick="gtag('event', 'open_wagashi_A', { event_category: 'AR', value: 1 });">
       Aセット
     </a>
 
-    <!-- Bセット（新URLに更新済み） -->
     <a class="ar-btn sub"
        rel="ar"
-       target="_blank"
-       href="https://www.dropbox.com/scl/fi/kvt216g3yshp1p3ytsjin/wagashi_B.usdz?rlkey=g0z8bqhcqx86y9jpn1lkkyhgc&st=ke6yomib&dl=0">
+       href="https://www.dropbox.com/scl/fi/kvt216g3yshp1p3ytsjin/wagashi_B.usdz?rlkey=g0z8bqhcqx86y9jpn1lkkyhgc&st=ke6yomib&dl=0"
+       onclick="gtag('event', 'open_wagashi_B', { event_category: 'AR', value: 1 });">
       Bセット
     </a>
-
   </div>
 
 </body>
