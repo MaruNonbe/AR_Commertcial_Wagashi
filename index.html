@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>和菓子ARギフト A/B デモ（黒画面対策版）</title>
+  <title>和菓子ARギフト A/B デモ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
   <style>
@@ -10,40 +10,39 @@
       margin: 0;
       overflow: hidden;
       background: #000;
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
       touch-action: none;
     }
 
-    /* AR開始ボタン */
-    #start-ar {
+    /* 説明テキスト */
+    #message {
       position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 16px;
-      font-size: 14px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
+      left: 16px;
+      bottom: 72px;
+      right: 16px;
+      z-index: 900;
+      font-size: 16px;
+      line-height: 1.4;
+      text-shadow: 0 0 4px #000;
     }
 
-    /* A/B 切り替え UI */
+    /* A/B 切り替えボタン */
     #ui {
       position: fixed;
       bottom: 16px;
       left: 0;
       right: 0;
-      display: none;
+      display: flex;
       justify-content: center;
       gap: 12px;
       z-index: 1000;
+      pointer-events: none; /* ボタン以外はタップ無効 */
     }
 
     .btn {
-      padding: 12px 18px;
+      pointer-events: auto;
+      padding: 10px 18px;
       font-size: 14px;
       background: rgba(0,0,0,0.7);
       color: #fff;
@@ -60,136 +59,148 @@
 </head>
 <body>
 
-  <button id="start-ar">ARを開始</button>
+  <div id="message">
+    和菓子ARテストページです。<br>
+    画面上部の「ARを開始」ボタンを押して、テーブルの上などで体験してください。
+  </div>
 
   <div id="ui">
     <button id="btnA" class="btn active">Aセット</button>
     <button id="btnB" class="btn">Bセット</button>
   </div>
 
-  <!-- ここから JavaScript（ES Modules） -->
+  <!-- Three.js + AR を ES Modules で読み込み -->
   <script type="module">
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js";
     import { ARButton } from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js";
     import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
 
+    // ▼ Dropbox の glb ファイル（raw=1 で直接読み込み）
+    const modelAPath = "https://www.dropbox.com/scl/fi/j19dldva9w5cwn2sioce8/wagashi_A.glb?raw=1";
+    const modelBPath = "https://www.dropbox.com/scl/fi/zmmi81qi960bcib1a4cky/wagashi_B.glb?raw=1";
+
+    const btnA = document.getElementById("btnA");
+    const btnB = document.getElementById("btnB");
+
     let scene, camera, renderer;
     let currentModel = null;
     let mixer = null;
     const clock = new THREE.Clock();
-    const loader = new GLTFLoader();
 
-    const modelAPath = "./assets/models/wagashi_a.glb";
-    const modelBPath = "./assets/models/wagashi_b.glb";
+    initThree();
+    setupButtons();
 
-    const startBtn = document.getElementById("start-ar");
-    const ui       = document.getElementById("ui");
-    const btnA     = document.getElementById("btnA");
-    const btnB     = document.getElementById("btnB");
-
-    // --- AR開始ボタン ---
-    startBtn.addEventListener("click", () => {
-      initAR();
-    });
-
-    function initAR() {
-      // 開始ボタンを消す
-      startBtn.style.display = "none";
-
-      // シーン・カメラ・ライト
+    function initThree() {
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera();
+
+      camera = new THREE.PerspectiveCamera(
+        70,
+        window.innerWidth / window.innerHeight,
+        0.01,
+        20
+      );
 
       const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
       scene.add(light);
 
-      // レンダラー
       renderer = new THREE.WebGLRenderer({
-        alpha: true,
         antialias: true,
-        powerPreference: "high-performance",
-        preserveDrawingBuffer: true
+        alpha: true,
+        powerPreference: "high-performance"
       });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.xr.enabled = true;
       document.body.appendChild(renderer.domElement);
 
-      // WebXR AR ボタンを作成（非表示にして即クリック）
-      const xrButton = ARButton.createButton(renderer, { requiredFeatures: ["hit-test"] });
-      xrButton.style.display = "none";
-      document.body.appendChild(xrButton);
-      xrButton.click();  // ユーザーのクリックイベント内なので許可される
+      // WebXR AR ボタン
+      const arButton = ARButton.createButton(renderer, {
+        requiredFeatures: [] // hit-test なし（対応端末が広い）
+      });
+      document.body.appendChild(arButton);
+      arButton.style.position = "fixed";
+      arButton.style.top = "14px";
+      arButton.style.left = "50%";
+      arButton.style.transform = "translateX(-50%)";
+      arButton.style.padding = "10px 18px";
+      arButton.style.borderRadius = "999px";
+      arButton.style.border = "none";
+      arButton.style.background = "rgba(0,0,0,0.8)";
+      arButton.style.color = "#fff";
+      arButton.style.fontSize = "14px";
+      arButton.textContent = "ARを開始";
 
-      // A/B 切り替え UI を表示
-      ui.style.display = "flex";
-
-      // 初期モデル（Aセット）読み込み
-      loadModel(modelAPath);
-
-      // 描画ループ
-      renderer.setAnimationLoop(() => {
-        const delta = clock.getDelta();
-        if (mixer) mixer.update(delta);
-        renderer.render(scene, camera);
+      // AR セッションが始まったら A セットを読み込み
+      renderer.xr.addEventListener("sessionstart", () => {
+        loadModel(modelAPath);
       });
 
-      // 画面回転・リサイズ対応
-      window.addEventListener("resize", onWindowResize);
+      // アニメーションループ
+      renderer.setAnimationLoop(render);
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     }
 
-    function onWindowResize() {
-      if (!renderer || !camera) return;
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+    function render() {
+      const delta = clock.getDelta();
+      if (mixer) mixer.update(delta);
+      renderer.render(scene, camera);
     }
 
-    // --- モデル読み込み ---
     function loadModel(path) {
-      if (!scene) return;
+      if (!path) return;
 
+      // 既存モデルを削除
       if (currentModel) {
         scene.remove(currentModel);
+        currentModel.traverse((obj) => {
+          if (obj.isMesh) {
+            obj.geometry.dispose();
+            if (obj.material.map) obj.material.map.dispose();
+            obj.material.dispose();
+          }
+        });
         currentModel = null;
+        mixer = null;
       }
-      mixer = null;
 
+      const loader = new GLTFLoader();
       loader.load(
         path,
         (gltf) => {
           currentModel = gltf.scene;
+          // カメラ前方 1m・少し下に配置（必要に応じて調整）
+          currentModel.position.set(0, -0.5, -1);
+          scene.add(currentModel);
 
-          // とりあえずカメラ前方・少し下に置く（本番ではヒットテストで床に置く予定）
-          currentModel.position.set(0, -0.5, -1.0);
-
-          // アニメーションがあれば再生
           if (gltf.animations && gltf.animations.length > 0) {
             mixer = new THREE.AnimationMixer(currentModel);
             const action = mixer.clipAction(gltf.animations[0]);
             action.play();
           }
-
-          scene.add(currentModel);
         },
         undefined,
-        (err) => {
-          console.error("モデル読み込みエラー:", err);
-          alert("3Dモデルを読み込めませんでした。パスやファイル名をご確認ください。");
+        (error) => {
+          console.error("GLB 読み込みエラー:", error);
         }
       );
     }
 
-    // --- A/B 切り替え ---
-    btnA.addEventListener("click", () => {
-      setActive("A");
-      loadModel(modelAPath);
-    });
+    function setupButtons() {
+      btnA.addEventListener("click", () => {
+        setActive("A");
+        loadModel(modelAPath);
+      });
 
-    btnB.addEventListener("click", () => {
-      setActive("B");
-      loadModel(modelBPath);
-    });
+      btnB.addEventListener("click", () => {
+        setActive("B");
+        loadModel(modelBPath);
+      });
+    }
 
     function setActive(type) {
       btnA.classList.toggle("active", type === "A");
