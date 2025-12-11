@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>和菓子ARギフト A/B セット（音声付き）</title>
+  <title>和菓子ARギフト A/B セット</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
   <style>
@@ -33,7 +33,7 @@
       display: flex;
       justify-content: center;
       gap: 12px;
-      margin-bottom: 28px;
+      margin-top: 20px;
     }
 
     .ar-btn {
@@ -51,32 +51,6 @@
       background: #444;
       color: #fff;
     }
-
-    .audio-box {
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid #333;
-    }
-
-    .audio-row {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      margin-top: 14px;
-    }
-
-    button.audio-btn {
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: none;
-      background: #222;
-      color: #fff;
-      font-size: 1rem;
-    }
-
-    .volume-slider {
-      width: 180px;
-    }
   </style>
 </head>
 
@@ -88,6 +62,7 @@
     ※iPhone / iPad の Safari でご利用ください。
   </p>
 
+  <!-- ▼ A/B セットのAR起動ボタン -->
   <div class="btn-row">
     <a class="ar-btn"
        rel="ar"
@@ -101,76 +76,6 @@
       Bセット
     </a>
   </div>
-
-  <div class="audio-box">
-    <h2 style="font-size:1.1rem;margin-bottom:6px;">音声コントロール</h2>
-
-    <div class="audio-row">
-      <button id="bgmPlay" class="audio-btn">🎵 BGM 再生</button>
-      <button id="bgmStop" class="audio-btn">⏹ 停止</button>
-    </div>
-
-    <div class="audio-row">
-      <button id="narPlay" class="audio-btn">🎙 ナレーション</button>
-      <button id="narStop" class="audio-btn">⏹ 停止</button>
-    </div>
-
-    <div class="audio-row">
-      <button id="muteToggle" class="audio-btn">🔇 ミュート</button>
-      <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8">
-    </div>
-  </div>
-
-  <!-- 音声ファイル -->
-  <audio id="bgmAudio" src="./assets/audio/bgm.mp3" loop></audio>
-  <audio id="narAudio" src="./assets/audio/narration.mp3"></audio>
-
-  <script>
-    const bgm = document.getElementById("bgmAudio");
-    const nar = document.getElementById("narAudio");
-
-    const bgmPlay = document.getElementById("bgmPlay");
-    const bgmStop = document.getElementById("bgmStop");
-
-    const narPlay = document.getElementById("narPlay");
-    const narStop = document.getElementById("narStop");
-
-    const muteToggle = document.getElementById("muteToggle");
-    const volumeSlider = document.getElementById("volumeSlider");
-
-    let isMuted = false;
-
-    bgmPlay.addEventListener("click", () => {
-      bgm.play();
-    });
-
-    bgmStop.addEventListener("click", () => {
-      bgm.pause();
-      bgm.currentTime = 0;
-    });
-
-    narPlay.addEventListener("click", () => {
-      nar.play();
-    });
-
-    narStop.addEventListener("click", () => {
-      nar.pause();
-      nar.currentTime = 0;
-    });
-
-    muteToggle.addEventListener("click", () => {
-      isMuted = !isMuted;
-      bgm.muted = isMuted;
-      nar.muted = isMuted;
-      muteToggle.textContent = isMuted ? "🔊 ミュート解除" : "🔇 ミュート";
-    });
-
-    volumeSlider.addEventListener("input", (e) => {
-      const v = e.target.value;
-      bgm.volume = v;
-      nar.volume = v;
-    });
-  </script>
 
 </body>
 </html>
