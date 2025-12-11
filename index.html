@@ -52,7 +52,6 @@
       color: #fff;
     }
 
-    /* ▼ 音声コントロールUI */
     .audio-box {
       margin-top: auto;
       padding-top: 10px;
@@ -78,7 +77,6 @@
     .volume-slider {
       width: 180px;
     }
-
   </style>
 </head>
 
@@ -90,7 +88,6 @@
     ※iPhone / iPad の Safari でご利用ください。
   </p>
 
-  <!-- ▼ A/B セットのAR起動ボタン -->
   <div class="btn-row">
     <a class="ar-btn"
        rel="ar"
@@ -105,33 +102,28 @@
     </a>
   </div>
 
-  <!-- ▼ 音声UI（BGM / ナレーション / ミュート / 音量） -->
   <div class="audio-box">
     <h2 style="font-size:1.1rem;margin-bottom:6px;">音声コントロール</h2>
 
-    <!-- BGM -->
     <div class="audio-row">
       <button id="bgmPlay" class="audio-btn">🎵 BGM 再生</button>
       <button id="bgmStop" class="audio-btn">⏹ 停止</button>
     </div>
 
-    <!-- ナレーション -->
     <div class="audio-row">
       <button id="narPlay" class="audio-btn">🎙 ナレーション</button>
       <button id="narStop" class="audio-btn">⏹ 停止</button>
     </div>
 
-    <!-- 音量 -->
     <div class="audio-row">
       <button id="muteToggle" class="audio-btn">🔇 ミュート</button>
       <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8">
     </div>
   </div>
 
-  <!-- ▼ 音声ファイル -->
-  <!-- フォルダ構成：assets/audio/narration.mp3 に合わせてパスを修正 -->
-<audio id="bgmAudio" src="./assets/audio/bgm.mp3" loop></audio>
-<audio id="narAudio" src="./assets/audio/narration.mp3"></audio>
+  <!-- 音声ファイル -->
+  <audio id="bgmAudio" src="./assets/audio/bgm.mp3" loop></audio>
+  <audio id="narAudio" src="./assets/audio/narration.mp3"></audio>
 
   <script>
     const bgm = document.getElementById("bgmAudio");
@@ -148,9 +140,8 @@
 
     let isMuted = false;
 
-    /* ▼ BGM */
     bgmPlay.addEventListener("click", () => {
-      bgm.play().catch(err => console.log("BGM 再生エラー:", err));
+      bgm.play();
     });
 
     bgmStop.addEventListener("click", () => {
@@ -158,9 +149,8 @@
       bgm.currentTime = 0;
     });
 
-    /* ▼ ナレーション */
     narPlay.addEventListener("click", () => {
-      nar.play().catch(err => console.log("ナレーション再生エラー:", err));
+      nar.play();
     });
 
     narStop.addEventListener("click", () => {
@@ -168,7 +158,6 @@
       nar.currentTime = 0;
     });
 
-    /* ▼ ミュート */
     muteToggle.addEventListener("click", () => {
       isMuted = !isMuted;
       bgm.muted = isMuted;
@@ -176,7 +165,6 @@
       muteToggle.textContent = isMuted ? "🔊 ミュート解除" : "🔇 ミュート";
     });
 
-    /* ▼ 音量スライダー */
     volumeSlider.addEventListener("input", (e) => {
       const v = e.target.value;
       bgm.volume = v;
