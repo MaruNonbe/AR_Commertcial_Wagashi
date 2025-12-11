@@ -128,9 +128,10 @@
     </div>
   </div>
 
-  <!-- ▼ 音声ファイル（あなたの音源に置き換えてください） -->
-  <audio id="bgmAudio" src="./audio/bgm.mp3" loop></audio>
-  <audio id="narAudio" src="./audio/narration.mp3"></audio>
+  <!-- ▼ 音声ファイル -->
+  <!-- フォルダ構成：assets/audio/narration.mp3 に合わせてパスを修正 -->
+  <audio id="bgmAudio" src="./assets/audio/bgm.mp3" loop></audio>
+  <audio id="narAudio" src="./assets/audio/narration.mp3"></audio>
 
   <script>
     const bgm = document.getElementById("bgmAudio");
@@ -149,7 +150,7 @@
 
     /* ▼ BGM */
     bgmPlay.addEventListener("click", () => {
-      bgm.play();
+      bgm.play().catch(err => console.log("BGM 再生エラー:", err));
     });
 
     bgmStop.addEventListener("click", () => {
@@ -159,7 +160,7 @@
 
     /* ▼ ナレーション */
     narPlay.addEventListener("click", () => {
-      nar.play();
+      nar.play().catch(err => console.log("ナレーション再生エラー:", err));
     });
 
     narStop.addEventListener("click", () => {
