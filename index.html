@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>和菓子ARギフト A/B デモ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
+  <!-- Three.js & WebXR -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+      background: #000;
+    }
+
+    /* UI全体 */
+    #ui {
+      position: fixed;
+      bottom: 16px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      font-size: 14px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn.active {
+      background: #cfa44a;
+      color: #000;
+      font-weight: bold;
+    }
+
+    #start-ar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AR開始ボタン -->
+  <button id="start-ar">ARを開始</button>
+
+  <!-- A/B 切替UI -->
+  <div id="ui" style="display:none;">
+    <button id="btnA" class="btn active">Aセット</button>
+    <button id="btnB" class="btn">Bセット</button>
+  </div>
+
+  <script>
+    let scene, camera, renderer;
+    let currentModel = null;
+
+    const modelAPath = "./assets/models/wagashi_a.glb";
+    const modelBPath = "./assets/models/wagashi_b.glb";
+
+    const startButton = document.getElementById("start-ar");
+    const ui = document.getElementById("ui");
+    const btnA = document.getElementById("btnA");
+    const btnB = document.getElementById("btnB");
+
+    startButton.addEventListener("click", initAR);
+    btnA.addEventListener("click", () => switchModel("A"));
+    btnB.addEventListener("click", () => switchModel("B"));
+
+    async function initAR() {
+      startButton.style.display = "none";
+      ui.style.display = "flex";
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera();
+
+      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+      scene.add(light);
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      document.body.appendChild(ARButton.createButton(renderer));
+
+      // 最初にAセットを読み込み
+      loadModel(modelAPath);
+
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+    }
+
+    async function loadModel(path) {
+      if (currentModel) {
+        scene.remove(currentModel);
+      }
+
+      const loader = new THREE.GLTFLoader();
+      loader.load(path, (gltf) => {
+        currentModel = gltf.scene;
+
+        // スケール調整（必要に応じて変更）
+        currentModel.scale.set(1, 1, 1);
+
+        // 床置き
+        currentModel.position.set(0, -0.5, -1);
+
+        scene.add(currentModel);
+      });
+    }
+
+    function switchModel(type) {
+      if (type === "A") {
+        loadModel(modelAPath);
+        btnA.classList.add("active");
+        btnB.classList.remove("active");
+      } else {
+        loadModel(modelBPath);
+        btnB.classList.add("active");
+        btnA.classList.remove("active");
+      }
+    }
+  </script>
+
+  <!-- GLTFLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+
+</body>
+</html>
