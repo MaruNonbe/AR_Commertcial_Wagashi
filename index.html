@@ -2,82 +2,186 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>和菓子ARギフト A/B デモ（iPhone用）</title>
+  <title>和菓子ARギフト A/B セット（音声付き）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
   <style>
-    body{
-      margin:0;
-      padding:0;
-      background:#000;
-      color:#fff;
-      font-family:system-ui,sans-serif;
-      display:flex;
-      flex-direction:column;
-      min-height:100vh;
-      box-sizing:border-box;
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
-    .content{
-      padding:16px;
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-end;
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
     }
-    p{
-      margin:0 0 16px;
-      font-size:15px;
-      line-height:1.6;
+
+    p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
     }
-    .btn-row{
-      display:flex;
-      justify-content:center;
-      gap:16px;
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
     }
-    .ar-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:12px 22px;
-      border-radius:999px;
-      border:none;
-      background:#cfa44a;
-      color:#000;
-      font-weight:bold;
-      text-decoration:none;
-      font-size:15px;
+
+    .ar-btn {
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      background: #d9ac4a;
+      color: #000;
+      text-decoration: none;
     }
-    .ar-btn.sub{
-      background:#333;
-      color:#fff;
-      font-weight:normal;
+
+    .ar-btn.sub {
+      background: #444;
+      color: #fff;
     }
+
+    /* ▼ 音声コントロールUI */
+    .audio-box {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid #333;
+    }
+
+    .audio-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    button.audio-btn {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: none;
+      background: #222;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .volume-slider {
+      width: 180px;
+    }
+
   </style>
 </head>
+
 <body>
 
-  <div class="content">
-    <p>
-      和菓子ARテストページです。<br>
-      下のボタンから Aセット / Bセット を選んで、テーブルの上などでAR表示をお試しください。<br>
-      ※iPhone / iPad の Safari でご利用ください。
-    </p>
+  <h1>和菓子ARギフト A/Bセット</h1>
+  <p>
+    下のボタンから Aセット / Bセット を選ぶと、AR表示が開きます。<br>
+    ※iPhone / iPad の Safari でご利用ください。
+  </p>
 
-    <div class="btn-row">
-      <!-- Aセット：wagashi_A.usdz -->
-      <a class="ar-btn"
-         rel="ar"
-         href="https://www.dropbox.com/scl/fi/5q835qy92gp4z1yizxg9s/wagashi_A.usdz?raw=1">
-        Aセット
-      </a>
+  <!-- ▼ A/B セットのAR起動ボタン -->
+  <div class="btn-row">
+    <a class="ar-btn"
+       rel="ar"
+       href="https://www.dropbox.com/scl/fi/5q835qy92gp4z1yizxg9s/wagashi_A.usdz?dl=1">
+      Aセット
+    </a>
 
-      <!-- Bセット：wagashi_B.usdz -->
-      <a class="ar-btn sub"
-         rel="ar"
-         href="https://www.dropbox.com/scl/fi/kvt216g3yshp1p3ytsjin/wagashi_B.usdz?raw=1">
-        Bセット
-      </a>
+    <a class="ar-btn sub"
+       rel="ar"
+       href="https://www.dropbox.com/scl/fi/kvt216g3yshp1p3ytsjin/wagashi_B.usdz?dl=1">
+      Bセット
+    </a>
+  </div>
+
+  <!-- ▼ 音声UI（BGM / ナレーション / ミュート / 音量） -->
+  <div class="audio-box">
+    <h2 style="font-size:1.1rem;margin-bottom:6px;">音声コントロール</h2>
+
+    <!-- BGM -->
+    <div class="audio-row">
+      <button id="bgmPlay" class="audio-btn">🎵 BGM 再生</button>
+      <button id="bgmStop" class="audio-btn">⏹ 停止</button>
+    </div>
+
+    <!-- ナレーション -->
+    <div class="audio-row">
+      <button id="narPlay" class="audio-btn">🎙 ナレーション</button>
+      <button id="narStop" class="audio-btn">⏹ 停止</button>
+    </div>
+
+    <!-- 音量 -->
+    <div class="audio-row">
+      <button id="muteToggle" class="audio-btn">🔇 ミュート</button>
+      <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8">
     </div>
   </div>
+
+  <!-- ▼ 音声ファイル（あなたの音源に置き換えてください） -->
+  <audio id="bgmAudio" src="./audio/bgm.mp3" loop></audio>
+  <audio id="narAudio" src="./audio/narration.mp3"></audio>
+
+  <script>
+    const bgm = document.getElementById("bgmAudio");
+    const nar = document.getElementById("narAudio");
+
+    const bgmPlay = document.getElementById("bgmPlay");
+    const bgmStop = document.getElementById("bgmStop");
+
+    const narPlay = document.getElementById("narPlay");
+    const narStop = document.getElementById("narStop");
+
+    const muteToggle = document.getElementById("muteToggle");
+    const volumeSlider = document.getElementById("volumeSlider");
+
+    let isMuted = false;
+
+    /* ▼ BGM */
+    bgmPlay.addEventListener("click", () => {
+      bgm.play();
+    });
+
+    bgmStop.addEventListener("click", () => {
+      bgm.pause();
+      bgm.currentTime = 0;
+    });
+
+    /* ▼ ナレーション */
+    narPlay.addEventListener("click", () => {
+      nar.play();
+    });
+
+    narStop.addEventListener("click", () => {
+      nar.pause();
+      nar.currentTime = 0;
+    });
+
+    /* ▼ ミュート */
+    muteToggle.addEventListener("click", () => {
+      isMuted = !isMuted;
+      bgm.muted = isMuted;
+      nar.muted = isMuted;
+      muteToggle.textContent = isMuted ? "🔊 ミュート解除" : "🔇 ミュート";
+    });
+
+    /* ▼ 音量スライダー */
+    volumeSlider.addEventListener("input", (e) => {
+      const v = e.target.value;
+      bgm.volume = v;
+      nar.volume = v;
+    });
+  </script>
 
 </body>
 </html>
