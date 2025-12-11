@@ -2,172 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>和菓子ARギフト A/B デモ（黒画面対策版）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-
-  <!-- Three.js & WebXR -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
-
+  <title>Wagashi AR Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       margin: 0;
-      overflow: hidden;
-      background: #000;
-      font-family: system-ui, sans-serif;
-      touch-action: none;
-    }
-
-    /* AR開始ボタン */
-    #start-ar {
-      position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 16px;
-      font-size: 14px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    /* UIボタン */
-    #ui {
-      position: fixed;
-      bottom: 16px;
-      left: 0;
-      right: 0;
-      display: none;
+      height: 100vh;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 12px;
-      z-index: 1000;
-    }
-
-    .btn {
-      padding: 12px 18px;
-      font-size: 14px;
-      background: rgba(0,0,0,0.7);
+      background: #222;
       color: #fff;
-      border: none;
-      border-radius: 999px;
-    }
-
-    .btn.active {
-      background: #cfa44a;
-      color: #000;
-      font-weight: bold;
+      font-family: system-ui, sans-serif;
     }
   </style>
 </head>
 <body>
-
-  <button id="start-ar">ARを開始</button>
-
-  <div id="ui">
-    <button id="btnA" class="btn active">Aセット</button>
-    <button id="btnB" class="btn">Bセット</button>
-  </div>
-
-  <script>
-    let scene, camera, renderer;
-    let currentModel = null;
-
-    const modelAPath = "./assets/models/wagashi_a.glb";
-    const modelBPath = "./assets/models/wagashi_b.glb";
-
-    const startBtn = document.getElementById("start-ar");
-    const ui = document.getElementById("ui");
-
-    startBtn.addEventListener("click", () => initAR());
-
-    async function initAR() {
-      startBtn.style.display = "none";
-
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera();
-
-      const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-      scene.add(light);
-
-      renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true,
-        powerPreference: "high-performance"
-      });
-
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-
-      document.body.appendChild(renderer.domElement);
-
-      // iPhone 黒画面対策：初期化タイミングを明確化
-      const xrButton = ARButton.createButton(renderer, { requiredFeatures: ["hit-test"] });
-      document.body.appendChild(xrButton);
-
-      xrButton.addEventListener("click", () => {
-        // XR開始後にUIを表示する
-        ui.style.display = "flex";
-
-        // 初期モデル読み込み
-        loadModel(modelAPath);
-      });
-
-      renderer.setAnimationLoop(() => {
-        renderer.render(scene, camera);
-      });
-
-      // 黒画面対策：orientation change に対応
-      window.addEventListener("resize", () => {
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    }
-
-    function loadModel(path) {
-      if (currentModel) scene.remove(currentModel);
-
-      const loader = new THREE.GLTFLoader();
-      loader.load(path, (gltf) => {
-        currentModel = gltf.scene;
-
-        // 床置き位置（必要に応じ調整）
-        currentModel.position.set(0, -0.5, -1);
-
-        // アニメーション対応
-        if (gltf.animations && gltf.animations.length > 0) {
-          const mixer = new THREE.AnimationMixer(currentModel);
-          const action = mixer.clipAction(gltf.animations[0]);
-          action.play();
-
-          renderer.setAnimationLoop((t) => {
-            mixer.update(0.016);
-            renderer.render(scene, camera);
-          });
-        }
-
-        scene.add(currentModel);
-      });
-    }
-
-    document.getElementById("btnA").addEventListener("click", () => {
-      loadModel(modelAPath);
-      setActive("A");
-    });
-
-    document.getElementById("btnB").addEventListener("click", () => {
-      loadModel(modelBPath);
-      setActive("B");
-    });
-
-    function setActive(type) {
-      document.getElementById("btnA").classList.toggle("active", type === "A");
-      document.getElementById("btnB").classList.toggle("active", type === "B");
-    }
-  </script>
-
+  <h1>和菓子ARテストページです</h1>
 </body>
 </html>
